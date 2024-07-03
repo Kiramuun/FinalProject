@@ -7,10 +7,16 @@ public class IAMovements : MonoBehaviour
 {
     [Header("Reference :")]
     [SerializeField] Transform _player;
+    [SerializeField] Animator _animator;
+    [SerializeField] GameObject _eyes;
+    [SerializeField] SkinnedMeshRenderer skinnedMesh;
     NavMeshAgent _agent;
 
-    [Header("Zone detection :")]
+    [Header("Stats :")]
     [SerializeField] float _rayonDetection;
+    [SerializeField] float _runSpeed;
+    [SerializeField] float dissolveRate = 0.125f;
+    [SerializeField] float refreshRate = 0.025f;
 
     [Header("Ballades :")]
     [SerializeField] float _tempBalladesMin;
@@ -18,8 +24,14 @@ public class IAMovements : MonoBehaviour
     [SerializeField] float _distanceBalladesMin;
     [SerializeField] float _distanceBalladesMax;
 
-    bool hasDestination,
-         isAttacking;
+    bool hasDestination;
+    Material _material;
+
+    private void Start()
+    {
+        if (skinnedMesh != null)
+            _material = skinnedMesh.material;
+    }
 
     void Awake()
     {
@@ -28,10 +40,21 @@ public class IAMovements : MonoBehaviour
 
     void Update()
     {
-        if (_agent.remainingDistance < 0.75f && !hasDestination)
+        if(_animator.GetBool("IsDead") == false)
         {
-            StartCoroutine(GetNewDestination());
+            if (_agent.remainingDistance < 0.75f && !hasDestination)
+            {
+                StartCoroutine(GetNewDestination());
+            }
         }
+        else
+        {
+            _eyes.SetActive(false);
+            StartCoroutine(DissolveCo());
+        }
+        
+        
+        _animator.SetFloat("Speed", _agent.velocity.magnitude);
     }
 
     void OnDrawGizmos()
@@ -54,5 +77,17 @@ public class IAMovements : MonoBehaviour
             _agent.SetDestination(hit.position);
         }
         hasDestination = false;
+    }
+
+    IEnumerator DissolveCo()
+    {
+        float counter = 0;
+        while (_material.GetFloat("_Dissolving") < 1)
+        {
+            counter += dissolveRate;
+            _material.SetFloat("_Dissolving", counter);
+            
+            yield return new WaitForSeconds(refreshRate);
+        }
     }
 }
