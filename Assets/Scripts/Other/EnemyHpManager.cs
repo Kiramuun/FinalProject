@@ -10,6 +10,7 @@ public class EnemyHpManager : MonoBehaviour
     [SerializeField] float health = 50;
     [SerializeField] float maxHealth = 50;
     [SerializeField] HealthBarManager healthBarManager;
+    [SerializeField] Animator _animator;
 
     private void Awake()
     {
@@ -34,6 +35,7 @@ public class EnemyHpManager : MonoBehaviour
 
     void Die()
     {
+        _animator.SetBool("IsDead", true);
         Debug.Log("je suis mort");
     }
 }
